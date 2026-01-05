@@ -1,0 +1,288 @@
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:pickme_fe_app/core/theme/app_colors.dart';
+import 'package:pickme_fe_app/features/auth/services/user_services.dart';
+
+class ResetPasswordPage extends StatefulWidget {
+  final String email; // User email passed from previous screen
+  final String otp; // OTP passed from previous screen
+
+  const ResetPasswordPage({super.key, required this.email, required this.otp});
+
+  @override
+  State<ResetPasswordPage> createState() => _ResetPasswordPageState();
+}
+
+class _ResetPasswordPageState extends State<ResetPasswordPage> {
+  final _formKey = GlobalKey<FormState>(); // Form key for validation
+
+  // Controller for input form
+  final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+
+  bool _isLoading = false; // Track loading state
+  bool _obscurePassword = true; // Toggle new password visibility
+  bool _obscureConfirmPassword = true; // Toggle confirm password visibility
+
+  final UserServices userServices = UserServices(); // Service for API call
+
+  @override
+  void dispose() {
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
+  }
+
+  /// Handle reset password submit
+  Future<void> _handleSubmit() async {
+    if (!_formKey.currentState!.validate()) return; // Validate form
+
+    setState(() => _isLoading = true);
+
+    try {
+      final isSuccess = await userServices.resetPassword(
+        widget.email,
+        widget.otp,
+        _passwordController.text.trim(),
+        _confirmPasswordController.text.trim(),
+      );
+
+      if (isSuccess) {
+        if (mounted) {
+          // Show success message
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Thay đổi mật khẩu thành công"),
+              backgroundColor: Colors.green,
+            ),
+          );
+          context.go("/login"); // Navigate to login
+        }
+      } else {
+        if (mounted) {
+          // Show failure message
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Thay đổi thất bại, vui lòng thử lại"),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        // Show error message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Lỗi: ${e.toString()}"),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false); // Stop loading
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+
+      // AppBar
+      appBar: AppBar(
+        backgroundColor: AppColors.primary,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => context.pop(), // Back button
+        ),
+        title: const Text(
+          "Thay đổi mật khẩu",
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+            fontSize: 18,
+          ),
+        ),
+        centerTitle: true,
+      ),
+
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const SizedBox(height: 40),
+
+                // Icon at top
+                Center(
+                  child: Container(
+                    width: 80,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      color: const Color(0xffFC7A1F).withValues(alpha: 0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.lock_reset,
+                      color: Color(0xffFC7A1F),
+                      size: 40,
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 32),
+
+                // Title
+                const Text(
+                  "Mật khẩu mới",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xff333333),
+                  ),
+                ),
+
+                const SizedBox(height: 12),
+
+                // Description
+                Text(
+                  "Thay đổi mật khẩu cho tài khoản (${widget.email})",
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: Color(0xff666666),
+                    height: 1.5,
+                  ),
+                ),
+
+                const SizedBox(height: 40),
+
+                // New Password input
+                TextFormField(
+                  controller: _passwordController,
+                  obscureText: _obscurePassword,
+                  decoration: InputDecoration(
+                    labelText: "Mật khẩu mới",
+                    prefixIcon: const Icon(Icons.lock_outline),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscurePassword
+                            ? Icons.visibility_off
+                            : Icons.visibility,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _obscurePassword =
+                              !_obscurePassword; // Toggle visibility
+                        });
+                      },
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Color(0xfffc7f20)),
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Nhập mật khẩu mới';
+                    }
+                    if (value.length < 6) {
+                      return 'Mật khẩu cần ít nhát 6 ký tự';
+                    }
+                    return null;
+                  },
+                ),
+
+                const SizedBox(height: 20),
+
+                // Confirm Password input
+                TextFormField(
+                  controller: _confirmPasswordController,
+                  obscureText: _obscureConfirmPassword,
+                  decoration: InputDecoration(
+                    labelText: "Xác nhận mật khẩu",
+                    prefixIcon: const Icon(Icons.lock_outline),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscureConfirmPassword
+                            ? Icons.visibility_off
+                            : Icons.visibility,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _obscureConfirmPassword =
+                              !_obscureConfirmPassword; // Toggle visibility
+                        });
+                      },
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Color(0xfffc7f20)),
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value != _passwordController.text) {
+                      return 'Mật khẩu không trùng';
+                    }
+                    return null;
+                  },
+                ),
+
+                const SizedBox(height: 32),
+
+                // Submit button
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: _isLoading ? null : _handleSubmit,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 2,
+                    ),
+                    child: _isLoading
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Text(
+                            "Thay đổi mật khẩu",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
