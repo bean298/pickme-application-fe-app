@@ -108,12 +108,26 @@ API_URL=http://YOUR_LOCAL_IP:8080/api
 
 ---
 
+## 🔄 System Flow
+
+This section describes how the **PickMe Frontend App** interacts with users and the backend system from authentication to order completion.
+
+### 👤 User (Customer)
+
+Register → Login  →  Browse restaurants (Home / Map)  → Select restaurant → View menu  → Add items to cart  → Select pickup time  
+→ Place order → Payment  → Track order status  → Pick up food at restaurant  → Submit rating & feedback
+
+### 🧑‍🍳 Restaurant Owner
+Register → Login → Create restaurant profile  → Submit restaurant for approval  → Wait for Admin approval  → Add and manage menu items  
+→ Receive customer pre-orders  → Update order status (Preparing → Ready)  → View orders & revenue  & feedback
+
+---
+
 Video demo:
 
 ```
 https://drive.google.com/file/d/1PeEM6wOXhGfFAIvdIqtM6rW5LF746Wi3/view?usp=sharing 
 ```
-
 
 
 
