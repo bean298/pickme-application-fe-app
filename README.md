@@ -72,7 +72,7 @@ This Flutter application communicates with the **PickMe Backend API** to provide
 
 ## ⚙️ Environment Configuration
 
-1. Create a `.env` file at the root of the project:
+Create a `.env` file at the root of the project:
 
 ```env
 # API URL FOR REAL DEVICE
