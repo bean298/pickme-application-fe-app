@@ -123,7 +123,7 @@ Register → Login → Create restaurant profile  → Submit restaurant for appr
 
 ---
 
-Video demo:
+## 📺 Video demo:
 
 ```
 https://drive.google.com/file/d/1PeEM6wOXhGfFAIvdIqtM6rW5LF746Wi3/view?usp=sharing 
